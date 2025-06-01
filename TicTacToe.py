@@ -249,7 +249,7 @@ class TTT(tk.Tk):
         self.t_debug.delete(1.0,"end")
         
         ###################  Fill Out  #######################
-        if not d_msg.startswith("SEND ") or check_msg(d_msg, self.send_ip): # 받은 입력의 메시지가 유효한지 확인
+        if not d_msg.startswith("SEND ") or not check_msg(d_msg, self.send_ip): # 받은 입력의 메시지가 유효한지 확인
             print("[DEBUG ERROR] Invalid Format")
             return
         
