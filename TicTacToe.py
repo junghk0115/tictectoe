@@ -356,17 +356,19 @@ class TTT(tk.Tk):
             print(msg) #디버깅용 메시지 출력
 
             ACK = self.socket.recv(SIZE).decode()
-            if not ACK.startswith("RESULT"): #메시지 유효성 확인
+            if not ACK.startswith("RESULT") or not check_msg(msg, self.recv_ip): #메시지 유효성 확인
                 return False
+            
             return True
         else: #내가 결과를 수신한 경우는 내가 졌을 때
             msg = self.socket.recv(SIZE).decode()
-            if not msg.startswith("RESULT"): #메시지 유효성 확인
+            if not msg.startswith("RESULT") or not check_msg(msg, self.recv_ip): #메시지 유효성 확인
                  return False
             
             ACK = f"RESULT ETTTP/1.0\r\nHost:{self.send_ip}\r\nWinner:{protocol_winner}\r\n\r\n"
             self.socket.send(ACK.encode())
             print(ACK) #디버깅용 메시지 출력
+
             return True
         ######################################################  
 
