@@ -33,12 +33,12 @@ if __name__ == '__main__':
             continue
 
         if start == 0 : #Server가 먼저 시작 
-            msg = f"SEND ETTTP/1.0\r\nHost: {MY_IP}\r\nFirst-Move: ME\r\n\r\n"
+            msg = f"SEND ETTTP/1.0\r\nHost:{MY_IP}\r\nFirst-Move: ME\r\n\r\n"
         else : #Client가 먼저 시작  
-            msg = f"SEND ETTTP/1.0\r\nHost: {MY_IP}\r\nFirst-Move: YOU\r\n\r\n"
+            msg = f"SEND ETTTP/1.0\r\nHost:{MY_IP}\r\nFirst-Move: YOU\r\n\r\n"
 
-        print(msg)
         client_socket.sendall(msg.encode())
+        print(msg) #디버깅용 출력
 
         f_ack = client_socket.recv(SIZE).decode()
         if not f_ack.startswith('ACK'):
