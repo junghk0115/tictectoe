@@ -214,7 +214,7 @@ class TTT(tk.Tk):
             return
         else:  
             # If message is valid - send ack, update board and change turn
-            coords_str = msg.strip().splitlines()[2].split(":")[1].strip("()") # 메시지에서 위치 추출 1,2
+            coords_str = msg.strip().splitlines()[2].split(":")[1].strip("()") # 메시지에서 위치 추출
             row, col = coords_str.split(",") # 위치에서 행, 열 값 추출
             row = int(row) # 행 값 정수로 변환
             col = int(col) # 열 값 정수로 변환
