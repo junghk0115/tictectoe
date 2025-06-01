@@ -249,45 +249,53 @@ class TTT(tk.Tk):
         self.t_debug.delete(1.0,"end")
         
         ###################  Fill Out  #######################
-        if d_msg.startswith("SEND "):
-            msg = d_msg[5:] # 메시지에서 "SEND " 부분 제거
-            msg_lines = msg.splitlines() # 줄 단위로 분리
-            move_line = msg_lines[2].strip() # New-Move: (row,col) 줄만 추출
-            coordinate = move_line.split(":")[1].strip("()") # move_line에서 좌표 부분만 추출
-            row, col = map(int, coordinate.split(",")) # 좌표에서 행, 열 값만 추출
-            loc = row * 3 + col # 위치 계산
+        if not d_msg.startswith("SEND "): # "SEND"로 시작하지 않으면
+            print("[DEBUG ERROR] Invalid Format")
+            return
+        
+        msg_valid_check = check_msg(d_msg, self.send_ip) #메시지 유효한지 확인
+        if not msg_valid_check: # 메세지가 유효하지 않은 경우
+            self.socket.close()   
+            self.quit()
+            return
+        
+        msg = d_msg[5:] # 메시지에서 "SEND " 부분 제거
+        msg_lines = msg.splitlines() # 줄 단위로 분리
+        move_line = msg_lines[2].strip() # New-Move: (row,col) 줄만 추출
+        coordinate = move_line.split(":")[1].strip("()") # move_line에서 좌표 부분만 추출
+        row, col = map(int, coordinate.split(",")) # 좌표에서 행, 열 값만 추출
+        loc = row * 3 + col # 위치 계산
 
-            # DEBUG: 이미 선택된 위치인지 확인
-            if self.board[loc] != 0:
-                print("[DEBUG ERROR] That cell is already taken.")
-                self.t_debug.delete(1.0,"end")
-                return
+        # DEBUG: 이미 선택된 위치인지 확인
+        if self.board[loc] != 0:
+            print("[DEBUG ERROR] That cell is already taken")
+            return
+            
+        # 상대에게 msg 전송
+        # 수정 SEND ETTTP/1.0\r\nHost:127.0.0.1\r\nNew-Move:(1,2)\r\n\r\n 와 같은 형식으로 보내야함
+        send_msg = f"SEND ETTTP/1.0\r\nHost:{self.send_ip}\r\nNew-Move:({row},{col})\r\n\r\n"
+        self.socket.send(send_msg.encode())
+        print(send_msg)  # 디버깅용 메시지 출력
+
+        # ACK 수신 및 검증
+        ack = self.socket.recv(1024).decode()
+        if not ack.startswith("ACK ETTTP/1.0"):
+            self.socket.close()
+            self.quit()
+            return
+
+        ######################################################  
+            
+        #vvvvvvvvvvvvvvvvvvv  DO NOT CHANGE  vvvvvvvvvvvvvvvvvvv
+        self.update_board(self.user, loc)
                 
-            # 상대에게 msg 전송
-            # 수정 SEND ETTTP/1.0\r\nHost:127.0.0.1\r\nNew-Move:(1,2)\r\n\r\n 와 같은 형식으로 보내야함
-            send_msg = f"SEND ETTTP/1.0\r\nHost:{self.send_ip}\r\nNew-Move:({row},{col})\r\n\r\n"
-            self.socket.send(send_msg.encode())
-            print(send_msg)  # 디버깅용 메시지 출력
-
-            # ACK 수신 및 검증
-            ack = self.socket.recv(1024).decode()
-            if not ack.startswith("ACK ETTTP/1.0"):
-                self.socket.close()
-                self.quit()
-                return
-
-            ######################################################  
+        if self.state == self.active:    # always after my move
+            self.my_turn = 0
+            self.l_status_bullet.config(fg='red')
+            self.l_status ['text'] = ['Hold']
+            _thread.start_new_thread(self.get_move,())
                 
-            #vvvvvvvvvvvvvvvvvvv  DO NOT CHANGE  vvvvvvvvvvvvvvvvvvv
-            self.update_board(self.user, loc)
-                    
-            if self.state == self.active:    # always after my move
-                self.my_turn = 0
-                self.l_status_bullet.config(fg='red')
-                self.l_status ['text'] = ['Hold']
-                _thread.start_new_thread(self.get_move,())
-                    
-            #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
             
     def send_move(self,selection):
         '''
