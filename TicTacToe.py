@@ -266,24 +266,32 @@ class TTT(tk.Tk):
         row, col = map(int, coordinate.split(",")) # 좌표에서 행, 열 값만 추출
         loc = row * 3 + col # 위치 계산
 
-        # DEBUG: 이미 선택된 위치인지 확인
+        '''
+        Check if the selected location is already taken or not
+        '''
+        # 이미 선택된 위치인지 확인
         if self.board[loc] != 0:
             print("[DEBUG ERROR] That cell is already taken")
             return
-            
+        
+        '''
+        Send message to peer
+        '''
         # 상대에게 msg 전송
-        # 수정 SEND ETTTP/1.0\r\nHost:127.0.0.1\r\nNew-Move:(1,2)\r\n\r\n 와 같은 형식으로 보내야함
         send_msg = f"SEND ETTTP/1.0\r\nHost:{self.send_ip}\r\nNew-Move:({row},{col})\r\n\r\n"
         self.socket.send(send_msg.encode())
         print(send_msg)  # 디버깅용 메시지 출력
 
+        '''
+        Get ack
+        '''
         # ACK 수신 및 검증
-        ack = self.socket.recv(1024).decode()
-        if not ack.startswith("ACK ETTTP/1.0"):
+        ack = self.socket.recv(SIZE).decode()
+        if not ack.startswith("ACK"):
             self.socket.close()
             self.quit()
             return
-
+        
         ######################################################  
             
         #vvvvvvvvvvvvvvvvvvv  DO NOT CHANGE  vvvvvvvvvvvvvvvvvvv
@@ -306,22 +314,19 @@ class TTT(tk.Tk):
         ###################  Fill Out  #######################
 
         # send message and check ACK
-
-        # DEBUG: 이미 선택된 위치인지 확인
+        # 이미 선택된 위치인지 확인
         if self.board[selection] != 0:
             print("[DEBUG ERROR] That cell is already taken.")
-            return False
+            return
 
         # 상대에게 msg 전송
-        #수정
-        # 수정 SEND ETTTP/1.0\r\nHost:127.0.0.1\r\nNew-Move:(1,2)\r\n\r\n 와 같은 형식으로 보내야함
         send_msg = f"SEND ETTTP/1.0\r\nHost:{self.send_ip}\r\nNew-Move:({row},{col})\r\n\r\n"
         self.socket.send(send_msg.encode())
         print(send_msg)  # 디버깅용 메시지 출력
 
         # ACK 수신 및 검증
-        ack = self.socket.recv(1024).decode()
-        if not ack.startswith("ACK ETTTP/1.0"):
+        ack = self.socket.recv(SIZE).decode()
+        if not ack.startswith("ACK"):
             self.socket.close()
             self.quit()
             return
