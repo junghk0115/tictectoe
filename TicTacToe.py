@@ -249,14 +249,8 @@ class TTT(tk.Tk):
         self.t_debug.delete(1.0,"end")
         
         ###################  Fill Out  #######################
-        if not d_msg.startswith("SEND "): # "SEND"로 시작하지 않으면
+        if not d_msg.startswith("SEND ") or check_msg(d_msg, self.send_ip): # 받은 입력의 메시지가 유효한지 확인
             print("[DEBUG ERROR] Invalid Format")
-            return
-        
-        msg_valid_check = check_msg(d_msg, self.send_ip) #메시지 유효한지 확인
-        if not msg_valid_check: # 메세지가 유효하지 않은 경우
-            self.socket.close()   
-            self.quit()
             return
         
         msg = d_msg[5:] # 메시지에서 "SEND " 부분 제거
@@ -266,28 +260,19 @@ class TTT(tk.Tk):
         row, col = map(int, coordinate.split(",")) # 좌표에서 행, 열 값만 추출
         loc = row * 3 + col # 위치 계산
 
-        '''
-        Check if the selected location is already taken or not
-        '''
         # 이미 선택된 위치인지 확인
         if self.board[loc] != 0:
             print("[DEBUG ERROR] That cell is already taken")
             return
-        
-        '''
-        Send message to peer
-        '''
+       
         # 상대에게 msg 전송
         send_msg = f"SEND ETTTP/1.0\r\nHost:{self.send_ip}\r\nNew-Move:({row},{col})\r\n\r\n"
         self.socket.send(send_msg.encode())
         print(send_msg)  # 디버깅용 메시지 출력
 
-        '''
-        Get ack
-        '''
         # ACK 수신 및 검증
-        ack = self.socket.recv(SIZE).decode()
-        if not ack.startswith("ACK"):
+        ACK = self.socket.recv(SIZE).decode()
+        if not ACK.startswith("ACK") or not check_msg(ACK, self.recv_ip):
             self.socket.close()
             self.quit()
             return
@@ -312,7 +297,6 @@ class TTT(tk.Tk):
         '''
         row,col = divmod(selection,3)
         ###################  Fill Out  #######################
-
         # send message and check ACK
         # 이미 선택된 위치인지 확인
         if self.board[selection] != 0:
@@ -325,8 +309,8 @@ class TTT(tk.Tk):
         print(send_msg)  # 디버깅용 메시지 출력
 
         # ACK 수신 및 검증
-        ack = self.socket.recv(SIZE).decode()
-        if not ack.startswith("ACK"):
+        ACK = self.socket.recv(SIZE).decode()
+        if not ACK.startswith("ACK") or not check_msg(ACK, self.recv_ip):
             self.socket.close()
             self.quit()
             return
