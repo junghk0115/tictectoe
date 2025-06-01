@@ -30,12 +30,12 @@ if __name__ == '__main__':
         f_msg = client_socket.recv(SIZE).decode()
 
         if "First-Move: YOU" in f_msg: #서버가 클라이언트에게 먼저 시작하라고 한 경우
-            f_ack = f"ACK ETTTP/1.0\r\nHost: {MY_IP}\r\nFirst-Move: ME\r\n\r\n"
+            ACK = f"ACK ETTTP/1.0\r\nHost:{MY_IP}\r\nFirst-Move: ME\r\n\r\n"
         else: #서버가 먼저 시작한 경우
-            f_ack = f"ACK ETTTP/1.0\r\nHost: {MY_IP}\r\nFirst-Move: YOU\r\n\r\n"
+            ACK = f"ACK ETTTP/1.0\r\nHost:{MY_IP}\r\nFirst-Move: YOU\r\n\r\n"
 
-        print(f_ack)
-        client_socket.sendall(f_ack.encode())
+        client_socket.sendall(ACK.encode())
+        print(ACK) #디버깅용 출력
         ###################################################################
         
         # Start game
