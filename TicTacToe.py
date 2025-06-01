@@ -351,24 +351,23 @@ class TTT(tk.Tk):
             protocol_winner = winner
     
         if not get: #내가 이긴 경우, 결과를 먼저 전송 
-            msg = f"RESULT ETTTP/1.0\r\nHost: {self.send_ip}\r\nWinner: {protocol_winner}\r\n\r\n"
+            msg = f"RESULT ETTTP/1.0\r\nHost:{self.send_ip}\r\nWinner:{protocol_winner}\r\n\r\n"
             self.socket.send(msg.encode())
-            print(msg)
+            print(msg) #디버깅용 메시지 출력
 
-            ACK = self.socket.recv(1024).decode()
-            if not ACK.startswith("RESULT ETTTP/1.0"):
-                return False
-            return True
-        else: #내가 결과를 수신을 우선 -> 내가 졌을 때
-            msg = self.socket.recv(1024).decode()
-            if not msg.startswith("RESULT ETTTP/1.0"):
-                 return False
+            ACK = self.socket.recv(SIZE).decode()
+            if not ACK.startswith("RESULT"): #메시지 유효성 확인
+                return
             
-            # recv_winner = msg.strip().splitlines()[2].split(":")[1].strip()
-            ACK = f"RESULT ETTTP/1.0\r\nHost: {self.send_ip}\r\nWinner: {protocol_winner}\r\n\r\n"
+        else: #내가 결과를 수신한 경우는 내가 졌을 때
+            msg = self.socket.recv(SIZE).decode()
+            if not msg.startswith("RESULT"): #메시지 유효성 확인
+                 return
+            
+            ACK = f"RESULT ETTTP/1.0\r\nHost:{self.send_ip}\r\nWinner:{protocol_winner}\r\n\r\n"
             self.socket.send(ACK.encode())
-            print(ACK)
-            return True
+            print(ACK) #디버깅용 메시지 출력
+            
         ######################################################  
 
         
