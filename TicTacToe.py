@@ -204,7 +204,7 @@ class TTT(tk.Tk):
         If is not, close socket and quit
         '''
         ###################  Fill Out  #######################
-        msg =  self.socket.recv(1024).decode() # 소켓 사용하여 메세지 받기
+        msg =  self.socket.recv(SIZE).decode() # 소켓 사용하여 메세지 받기
 
         msg_valid_check = check_msg(msg, self.recv_ip) # 메세지가 유효한지 확인
         
@@ -214,8 +214,7 @@ class TTT(tk.Tk):
             return
         else:  
             # If message is valid - send ack, update board and change turn
-            # 아래 else 구문 전체 수정
-            coords_str = msg.strip().splitlines()[2].split(":")[1].strip("()") # 메시지에서 위치 추출 1,2 이렇게
+            coords_str = msg.strip().splitlines()[2].split(":")[1].strip("()") # 메시지에서 위치 추출 1,2
             row, col = coords_str.split(",") # 위치에서 행, 열 값 추출
             row = int(row) # 행 값 정수로 변환
             col = int(col) # 열 값 정수로 변환
